@@ -47,7 +47,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ResourceBundle;
 
-public class PlainGaugeStyle implements GaugeStyle, ActionListener {
+public class BigNumberAlertGaugeStyle implements GaugeStyle, ActionListener {
     protected static final ResourceBundle rb = new ResourceUtil().getBundle(
             PlainGaugeStyle.class.getName());
     private static final String BLANK = "";
@@ -73,7 +73,7 @@ public class PlainGaugeStyle implements GaugeStyle, ActionListener {
     private double min = Double.MAX_VALUE;
     private JPanel panel = new JPanel();
 
-    public PlainGaugeStyle(LoggerData loggerData) {
+    public BigNumberAlertGaugeStyle(LoggerData loggerData) {
         checkNotNull(loggerData, "loggerData");
         this.loggerData = loggerData;
         zeroText = format(loggerData, 0.0);
@@ -132,22 +132,22 @@ public class PlainGaugeStyle implements GaugeStyle, ActionListener {
     protected void doApply(JPanel panel) {
         refreshTitle();
         resetValue();
-        panel.setPreferredSize(new Dimension(236, 144));
+        panel.setPreferredSize(new Dimension(227, 168));
         panel.setBackground(LIGHT_GREY);
         panel.setLayout(new BorderLayout(3, 0));
 
         // title
-        title.setFont(panel.getFont().deriveFont(BOLD, 12F));
+        title.setFont(panel.getFont().deriveFont(BOLD, 14F));
         title.setForeground(WHITE);
         panel.add(title, NORTH);
 
         // data panel
         JPanel data = new JPanel(new FlowLayout(FlowLayout.CENTER, 3, 1));
         data.setBackground(BLACK);
-        liveValueLabel.setFont(panel.getFont().deriveFont(PLAIN, 40F));
+        liveValueLabel.setFont(panel.getFont().deriveFont(PLAIN, 60F));
         liveValueLabel.setForeground(WHITE);
         liveValuePanel.setBackground(LIGHT_GREY);
-        liveValuePanel.setPreferredSize(new Dimension(140, 80));
+        liveValuePanel.setPreferredSize(new Dimension(160, 106));
         liveValuePanel.add(liveValueLabel, CENTER);
         data.add(liveValuePanel);
 
@@ -160,14 +160,6 @@ public class PlainGaugeStyle implements GaugeStyle, ActionListener {
         maxMinPanel.add(minPanel, SOUTH);
         data.add(maxMinPanel);
 
-        // progress bar
-        progressBar.setStringPainted(false);
-        progressBar.setIndeterminate(false);
-        progressBar.setPreferredSize(new Dimension(20, 82));
-        progressBar.setBackground(WHITE);
-        progressBar.setForeground(GREEN);
-        data.add(progressBar);
-
         // warn setting
         JPanel warnPanel = new JPanel();
         warnPanel.setBackground(BLACK);
@@ -178,7 +170,7 @@ public class PlainGaugeStyle implements GaugeStyle, ActionListener {
         warnCheckBox.setFont(panel.getFont().deriveFont(PLAIN, 10F));
         warnCheckBox.setBackground(BLACK);
         warnCheckBox.setForeground(LIGHTER_GREY);
-        warnCheckBox.setSelected(false);
+        warnCheckBox.setSelected(true);
         warnCheckBox.addActionListener(this);
         warnType.setPreferredSize(new Dimension(60, 20));
         warnType.setFont(panel.getFont().deriveFont(PLAIN, 10F));
@@ -188,6 +180,7 @@ public class PlainGaugeStyle implements GaugeStyle, ActionListener {
         warnTextField.setBackground(BLACK);
         warnTextField.setForeground(LIGHTER_GREY);
         warnTextField.setCaretColor(LIGHTER_GREY);
+        warnTextField.setText("105");
         warnFormPanel.add(warnCheckBox);
         warnFormPanel.add(warnType);
         warnFormPanel.add(warnTextField);
@@ -200,9 +193,9 @@ public class PlainGaugeStyle implements GaugeStyle, ActionListener {
 
     private JPanel buildMaxMinPanel(String title, JLabel label) {
         JPanel panel = new JPanel(new BorderLayout(1, 1));
-        label.setFont(panel.getFont().deriveFont(PLAIN, 12F));
+        label.setFont(panel.getFont().deriveFont(PLAIN, 16F));
         label.setForeground(WHITE);
-        panel.setPreferredSize(new Dimension(60, 38));
+        panel.setPreferredSize(new Dimension(60, 50));
         panel.setBackground(LIGHT_GREY);
         JLabel titleLabel = new JLabel(title, JLabel.CENTER);
         titleLabel.setFont(panel.getFont().deriveFont(BOLD, 12F));

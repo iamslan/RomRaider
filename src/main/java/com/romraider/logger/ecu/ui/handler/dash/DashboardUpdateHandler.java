@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class DashboardUpdateHandler implements DataUpdateHandler, ConvertorUpdateListener {
-    private static final Class[] STYLES = {PlainGaugeStyle.class, SmallGaugeStyle.class, NoFrillsGaugeStyle.class, DialGaugeStyle.class, SmallDialGaugeStyle.class};
+    private static final Class[] STYLES = {PlainGaugeStyle.class, SmallGaugeStyle.class, NoFrillsGaugeStyle.class, DialGaugeStyle.class, SmallDialGaugeStyle.class, BigNumberGaugeStyle.class, RpmGaugeStyle.class, BigNumberAlertGaugeStyle.class};
     private final Map<LoggerData, Gauge> gauges = synchronizedMap(new HashMap<LoggerData, Gauge>());
     private final JPanel dashboardPanel;
     public int styleIndex;
@@ -45,9 +45,13 @@ public final class DashboardUpdateHandler implements DataUpdateHandler, Converto
 
     public synchronized void registerData(final LoggerData loggerData) {
         GaugeStyle style = getGaugeStyle(STYLES[styleIndex], loggerData);
-        Gauge gauge = new Gauge(style);
+        Gauge gauge = new Gauge(style, loggerData.getId(), loggerData.getName());
         gauges.put(loggerData, gauge);
-        dashboardPanel.add(gauge);
+        if (gauge.getID().equals("P8")) {
+            dashboardPanel.add(gauge, 0);
+        } else {
+            dashboardPanel.add(gauge);
+        }
         repaintDashboardPanel();
     }
 
@@ -72,6 +76,36 @@ public final class DashboardUpdateHandler implements DataUpdateHandler, Converto
     public synchronized void cleanUp() {
     }
 
+    public synchronized void setCustomDash() {
+        Class<? extends GaugeStyle> styleClass = STYLES[styleIndex];
+        for (Map.Entry<LoggerData, Gauge> entry : gauges.entrySet()) {
+            //HERE
+            System.out.println(">>>>>>>>>>>>>>>");
+            System.out.println(entry.getValue().getID());
+            System.out.println(entry.getValue().getName());
+            
+            if (entry.getValue().getID().equals("P8")) {
+                entry.getValue().setGaugeStyle(getGaugeStyle(RpmGaugeStyle.class, entry.getKey()));
+            }
+            else if (entry.getValue().getID().equals("P12") ||
+                entry.getValue().getID().equals("P8") ||
+                entry.getValue().getID().equals("P9") ||
+                entry.getValue().getID().equals("P11"))
+            {
+                entry.getValue().setGaugeStyle(getGaugeStyle(BigNumberGaugeStyle.class, entry.getKey()));
+            }
+            else if (entry.getValue().getID().equals("P2"))
+            {
+                entry.getValue().setGaugeStyle(getGaugeStyle(BigNumberAlertGaugeStyle.class, entry.getKey()));
+            }
+            else
+            {
+                entry.getValue().setGaugeStyle(getGaugeStyle(styleClass, entry.getKey()));
+            }
+        }
+        repaintDashboardPanel();
+    }
+
     public synchronized void reset() {
         for (Gauge gauge : gauges.values()) {
             gauge.resetValue();
@@ -89,8 +123,7 @@ public final class DashboardUpdateHandler implements DataUpdateHandler, Converto
     public synchronized void toggleGaugeStyle() {
         Class<? extends GaugeStyle> styleClass = getNextStyleClass();
         for (Map.Entry<LoggerData, Gauge> entry : gauges.entrySet()) {
-            GaugeStyle style = getGaugeStyle(styleClass, entry.getKey());
-            entry.getValue().setGaugeStyle(style);
+            entry.getValue().setGaugeStyle(getGaugeStyle(styleClass, entry.getKey()));
         }
         repaintDashboardPanel();
     }

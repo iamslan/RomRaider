@@ -27,10 +27,22 @@ import java.awt.BorderLayout;
 public final class Gauge extends JPanel {
     private static final long serialVersionUID = 7354117571944547043L;
     private GaugeStyle style;
+    private String id;
+    private String name;
 
-    public Gauge(GaugeStyle style) {
+    public Gauge(GaugeStyle style, String id, String name) {
+        this.id = id;
+        this.name = name;
         setLayout(new BorderLayout(0, 0));
         setGaugeStyle(style);
+    }
+
+    public String getID() {
+        return this.id;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     public void refreshTitle() {

@@ -47,7 +47,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ResourceBundle;
 
-public class PlainGaugeStyle implements GaugeStyle, ActionListener {
+public class RpmGaugeStyle implements GaugeStyle, ActionListener {
     protected static final ResourceBundle rb = new ResourceUtil().getBundle(
             PlainGaugeStyle.class.getName());
     private static final String BLANK = "";
@@ -63,7 +63,7 @@ public class PlainGaugeStyle implements GaugeStyle, ActionListener {
     protected final JLabel maxLabel = new JLabel(BLANK, JLabel.CENTER);
     protected final JLabel minLabel = new JLabel(BLANK, JLabel.CENTER);
     protected final JLabel title = new JLabel(BLANK, JLabel.CENTER);
-    protected final JProgressBar progressBar = new JProgressBar(JProgressBar.VERTICAL);
+    protected final JProgressBar progressBar = new JProgressBar(JProgressBar.HORIZONTAL);
     protected final JCheckBox warnCheckBox = new JCheckBox(rb.getString("LBLWARN"));
     protected final JComboBox warnType = new JComboBox(new Object[]{ABOVE, BELOW});
     protected final JTextField warnTextField = new JTextField();
@@ -73,7 +73,7 @@ public class PlainGaugeStyle implements GaugeStyle, ActionListener {
     private double min = Double.MAX_VALUE;
     private JPanel panel = new JPanel();
 
-    public PlainGaugeStyle(LoggerData loggerData) {
+    public RpmGaugeStyle(LoggerData loggerData) {
         checkNotNull(loggerData, "loggerData");
         this.loggerData = loggerData;
         zeroText = format(loggerData, 0.0);
@@ -132,66 +132,64 @@ public class PlainGaugeStyle implements GaugeStyle, ActionListener {
     protected void doApply(JPanel panel) {
         refreshTitle();
         resetValue();
-        panel.setPreferredSize(new Dimension(236, 144));
+        panel.setPreferredSize(new Dimension(916, 188));
         panel.setBackground(LIGHT_GREY);
         panel.setLayout(new BorderLayout(3, 0));
 
         // title
-        title.setFont(panel.getFont().deriveFont(BOLD, 12F));
+        title.setFont(panel.getFont().deriveFont(BOLD, 14F));
         title.setForeground(WHITE);
         panel.add(title, NORTH);
 
         // data panel
         JPanel data = new JPanel(new FlowLayout(FlowLayout.CENTER, 3, 1));
         data.setBackground(BLACK);
-        liveValueLabel.setFont(panel.getFont().deriveFont(PLAIN, 40F));
-        liveValueLabel.setForeground(WHITE);
-        liveValuePanel.setBackground(LIGHT_GREY);
-        liveValuePanel.setPreferredSize(new Dimension(140, 80));
-        liveValuePanel.add(liveValueLabel, CENTER);
-        data.add(liveValuePanel);
-
-        // max/min panel
-        JPanel maxMinPanel = new JPanel(new BorderLayout(2, 2));
-        maxMinPanel.setBackground(BLACK);
-        JPanel maxPanel = buildMaxMinPanel(rb.getString("LBLMAX"), maxLabel);
-        JPanel minPanel = buildMaxMinPanel(rb.getString("LBLMIN"), minLabel);
-        maxMinPanel.add(maxPanel, NORTH);
-        maxMinPanel.add(minPanel, SOUTH);
-        data.add(maxMinPanel);
 
         // progress bar
         progressBar.setStringPainted(false);
         progressBar.setIndeterminate(false);
-        progressBar.setPreferredSize(new Dimension(20, 82));
-        progressBar.setBackground(WHITE);
+        progressBar.setPreferredSize(new Dimension(912, 110));
+        progressBar.setBackground(BLACK);
         progressBar.setForeground(GREEN);
         data.add(progressBar);
 
         // warn setting
         JPanel warnPanel = new JPanel();
         warnPanel.setBackground(BLACK);
-        JPanel warnFormPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        warnFormPanel.setPreferredSize(new Dimension(226, 34));
-        warnFormPanel.setBackground(BLACK);
-        warnFormPanel.setBorder(createLineBorder(LIGHT_GREY, 1));
+        
+        liveValueLabel.setFont(panel.getFont().deriveFont(PLAIN, 40F));
+        liveValueLabel.setForeground(WHITE);
+        liveValuePanel.setBackground(LIGHT_GREY);
+        liveValuePanel.setPreferredSize(new Dimension(360, 40));
+        liveValuePanel.add(liveValueLabel, CENTER);
+        warnPanel.add(liveValuePanel);
+
+        // max/min panel
+        JPanel maxPanel = buildMaxMinPanel(rb.getString("LBLMAX"), maxLabel);
+        JPanel minPanel = buildMaxMinPanel(rb.getString("LBLMIN"), minLabel);
+        warnPanel.add(maxPanel, NORTH);
+        warnPanel.add(minPanel, SOUTH);
+
         warnCheckBox.setFont(panel.getFont().deriveFont(PLAIN, 10F));
         warnCheckBox.setBackground(BLACK);
         warnCheckBox.setForeground(LIGHTER_GREY);
-        warnCheckBox.setSelected(false);
+        warnCheckBox.setSelected(true);
         warnCheckBox.addActionListener(this);
+
         warnType.setPreferredSize(new Dimension(60, 20));
         warnType.setFont(panel.getFont().deriveFont(PLAIN, 10F));
         warnType.setBackground(BLACK);
         warnType.setForeground(LIGHTER_GREY);
+
         warnTextField.setColumns(4);
         warnTextField.setBackground(BLACK);
         warnTextField.setForeground(LIGHTER_GREY);
         warnTextField.setCaretColor(LIGHTER_GREY);
-        warnFormPanel.add(warnCheckBox);
-        warnFormPanel.add(warnType);
-        warnFormPanel.add(warnTextField);
-        warnPanel.add(warnFormPanel);
+        warnTextField.setText("6400");
+
+        warnPanel.add(warnCheckBox);
+        warnPanel.add(warnType);
+        warnPanel.add(warnTextField);
 
         // add panels
         panel.add(data, CENTER);
@@ -202,7 +200,7 @@ public class PlainGaugeStyle implements GaugeStyle, ActionListener {
         JPanel panel = new JPanel(new BorderLayout(1, 1));
         label.setFont(panel.getFont().deriveFont(PLAIN, 12F));
         label.setForeground(WHITE);
-        panel.setPreferredSize(new Dimension(60, 38));
+        panel.setPreferredSize(new Dimension(146, 38));
         panel.setBackground(LIGHT_GREY);
         JLabel titleLabel = new JLabel(title, JLabel.CENTER);
         titleLabel.setFont(panel.getFont().deriveFont(BOLD, 12F));

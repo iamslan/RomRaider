@@ -8,7 +8,7 @@
             "type": "java",
             "name": "Debug (Launch)-ECUExec<romraider>",
             "request": "launch",
-            "mainClass": "com.romraider.ECUExec",
+            "mainClass": "com.romraider.logger.ecu.EcuLoggerExec",// "com.romraider.ECUExec",
             "projectName": "romraider"
         },
         {

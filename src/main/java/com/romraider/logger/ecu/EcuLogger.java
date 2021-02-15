@@ -146,6 +146,7 @@ import com.romraider.logger.ecu.profile.UserProfileItemImpl;
 import com.romraider.logger.ecu.profile.UserProfileLoader;
 import com.romraider.logger.ecu.profile.UserProfileLoaderImpl;
 import com.romraider.logger.ecu.ui.CustomButtonGroup;
+import com.romraider.logger.ecu.ui.CustomDashHandler;
 import com.romraider.logger.ecu.ui.DataRegistrationBroker;
 import com.romraider.logger.ecu.ui.DataRegistrationBrokerImpl;
 import com.romraider.logger.ecu.ui.EcuDataComparator;
@@ -213,6 +214,7 @@ public final class EcuLogger extends AbstractFrame implements MessageListener {
             EcuLogger.class.getName());
     private static final String ECU_LOGGER_TITLE = PRODUCT_NAME + " v" + VERSION + " | " + rb.getString("TITLE");
     private static final String LOGGER_FULLSCREEN_ARG = "-logger.fullscreen";
+    private static final String LOGGER_CUSTOMDASH_ARG = "-logger.customdash";
     private static final String LOGGER_TOUCH_ARG = "-logger.touch";
     private static final URL ICON_PATH =  Settings.class.getClass().getResource("/graphics/romraider-ico.gif");
     private static final String HEADING_PARAMETERS = "Parameters";
@@ -267,6 +269,7 @@ public final class EcuLogger extends AbstractFrame implements MessageListener {
     private GraphUpdateHandler graphUpdateHandler;
     private JPanel dashboardPanel;
     private DashboardUpdateHandler dashboardUpdateHandler;
+    private CustomDashHandler customDashHandler;
     private MafTab mafTab;
     private MafUpdateHandler mafUpdateHandler;
     private DataUpdateHandlerManager mafHandlerManager;
@@ -415,6 +418,7 @@ public final class EcuLogger extends AbstractFrame implements MessageListener {
         graphUpdateHandler = new GraphUpdateHandler(graphPanel);
         dashboardPanel = new JPanel(new BetterFlowLayout(FlowLayout.CENTER, 3, 3));
         dashboardUpdateHandler = new DashboardUpdateHandler(dashboardPanel, getSettings().getLoggerSelectedGaugeIndex());
+        customDashHandler = new CustomDashHandler();
         mafUpdateHandler = new MafUpdateHandler();
         injectorUpdateHandler = new InjectorUpdateHandler();
         dynoUpdateHandler = new DynoUpdateHandler();
@@ -455,6 +459,7 @@ public final class EcuLogger extends AbstractFrame implements MessageListener {
         dashboardTabParamListTableModel = new ParameterListTableModel(dashboardTabBroker, HEADING_PARAMETERS);
         dashboardTabSwitchListTableModel = new ParameterListTableModel(dashboardTabBroker, HEADING_SWITCHES);
         dashboardTabExternalListTableModel = new ParameterListTableModel(dashboardTabBroker, HEADING_EXTERNAL);
+        customDashHandler.initDash();
     }
 
     public void loadLoggerParams() {
@@ -749,6 +754,7 @@ public final class EcuLogger extends AbstractFrame implements MessageListener {
             ecuParam.addConvertorUpdateListener(liveDataUpdateHandler);
             ecuParam.addConvertorUpdateListener(graphUpdateHandler);
             ecuParam.addConvertorUpdateListener(dashboardUpdateHandler);
+            ecuParam.addConvertorUpdateListener(customDashHandler);
         }
     }
 
@@ -758,6 +764,7 @@ public final class EcuLogger extends AbstractFrame implements MessageListener {
             externalData.addConvertorUpdateListener(liveDataUpdateHandler);
             externalData.addConvertorUpdateListener(graphUpdateHandler);
             externalData.addConvertorUpdateListener(dashboardUpdateHandler);
+            externalData.addConvertorUpdateListener(customDashHandler);
         }
     }
 
@@ -1705,23 +1712,7 @@ public final class EcuLogger extends AbstractFrame implements MessageListener {
 
     private JComponent buildDashboardTab() {
         JPanel panel = new JPanel(new BorderLayout());
-        JButton resetButton;
-
-        if (touchEnabled == false)
-        {
-            resetButton = new JButton(rb.getString("RESETDATA"));
-        }
-        else
-        {
-            resetButton = new JButton("<html><body leftmargin=15 topmargin=15 marginwidth=15 marginheight=15>Reset Data</body></html>");
-        }
-        resetButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                dashboardUpdateHandler.reset();
-            }
-        });
-        panel.add(resetButton, NORTH);
+        JButton customButton;
         JScrollPane sp = new JScrollPane(dashboardPanel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_NEVER);
         sp.getVerticalScrollBar().setUnitIncrement(40);
         panel.add(sp, CENTER);
@@ -2029,20 +2020,28 @@ public final class EcuLogger extends AbstractFrame implements MessageListener {
 
     public static void startLogger(int defaultCloseOperation, ECUEditor ecuEditor) {
         EcuLogger ecuLogger = new EcuLogger(ecuEditor);
-        createAndShowGui(defaultCloseOperation, ecuLogger, false);
+        createAndShowGui(defaultCloseOperation, ecuLogger, false, false);
     }
 
     public static void startLogger(int defaultCloseOperation, String... args) {
         touchEnabled = setTouchEnabled(args);
         EcuLogger ecuLogger = new EcuLogger();
         boolean fullscreen = containsFullScreenArg(args);
+        boolean customdash = containsCustomDashArg(args);
 
-        createAndShowGui(defaultCloseOperation, ecuLogger, fullscreen);
+        createAndShowGui(defaultCloseOperation, ecuLogger, fullscreen, customdash);
     }
 
     private static boolean containsFullScreenArg(String... args) {
         for (String arg : args) {
             if (LOGGER_FULLSCREEN_ARG.equalsIgnoreCase(arg)) return true;
+        }
+        return false;
+    }
+
+    private static boolean containsCustomDashArg(String... args) {
+        for (String arg : args) {
+            if (LOGGER_CUSTOMDASH_ARG.equalsIgnoreCase(arg)) return true;
         }
         return false;
     }
@@ -2054,16 +2053,16 @@ public final class EcuLogger extends AbstractFrame implements MessageListener {
         return false;
     }
 
-    private static void createAndShowGui(final int defaultCloseOperation, final EcuLogger ecuLogger, final boolean fullscreen) {
+    private static void createAndShowGui(final int defaultCloseOperation, final EcuLogger ecuLogger, final boolean fullscreen, final boolean customdash) {
         invokeLater(new Runnable() {
             @Override
             public void run() {
-                doCreateAndShowGui(defaultCloseOperation, ecuLogger, fullscreen);
+                doCreateAndShowGui(defaultCloseOperation, ecuLogger, fullscreen, customdash);
             }
         });
     }
 
-    private static void doCreateAndShowGui(int defaultCloseOperation, EcuLogger ecuLogger, boolean fullscreen) {
+    private static void doCreateAndShowGui(int defaultCloseOperation, EcuLogger ecuLogger, boolean fullscreen, final boolean customdash) {
         Settings settings = ecuLogger.getSettings();
 
         // set window properties
